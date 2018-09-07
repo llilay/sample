@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\User;
+use Auth;
 
 class UsersController extends Controller
 {
@@ -60,6 +61,7 @@ class UsersController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
+        Auth::login($user);//注册后自动登录
         //使用 session() 方法来访问会话实例. flash 只在下一次的请求内有效
         //之后我们可以使用 session()->get('success') 通过键名来取出对应会话中的数据
         session()->flash('success', '欢迎，您将在这里开启一段新的旅程~');
