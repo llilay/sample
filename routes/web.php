@@ -24,3 +24,8 @@ Route::post('login', 'SessionsController@store')->name('login');//创建新会�
 Route::delete('logout', 'SessionsController@destroy')->name('logout');//销毁会话（退出登录）
 
 Route::get('signup/comfirm/{token}', 'UsersController@confirmEmail')->name('confirm_email');
+
+Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
