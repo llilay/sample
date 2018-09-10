@@ -9,6 +9,17 @@ use Auth;
 
 class UsersController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth', [
+            'except' => ['show', 'create', 'store', 'index']
+        ]);
+
+        $this->middleware('guest', [
+            'only' => ['create']
+        ]);
+    }
+
     /**
      * 用户注册页面
      *
@@ -20,18 +31,7 @@ class UsersController extends Controller
     }
 
     /**
-     * 用户信息显示页面
-     *
-     * @param User $user
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function show(User $user)
-    {
-        return view('users.show', compact('user'));
-    }
-
-    /**
-     * 用户注册
+     * 用户注册动作
      * 将用户提交的信息存储到数据库，并重定向到其个人页面；
      * 在网页顶部位置显示注册成功的提示信息；
      *
@@ -65,8 +65,65 @@ class UsersController extends Controller
         //使用 session() 方法来访问会话实例. flash 只在下一次的请求内有效
         //之后我们可以使用 session()->get('success') 通过键名来取出对应会话中的数据
         session()->flash('success', '欢迎，您将在这里开启一段新的旅程~');
+
         return redirect()->route('users.show', [$user]);
         //route() 方法会自动获取 Model 的主键, 以上代码等同于：
         //redirect()->route('users.show', [$user->id]);
+    }
+
+    public function index()
+    {
+        //$users = User::all();
+        $users = User::paginate(10);
+        return view('users.index', compact('users'));
+    }
+
+    /**
+     * 用户个人信息显示页面
+     *
+     * @param User $user
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function show(User $user)
+    {
+        return view('users.show', compact('user'));
+    }
+
+    //修改个人资料页面
+    public function edit(User $user)
+    {
+        $this->authorize('update', $user);
+        return view('users.edit',compact('user'));
+    }
+
+    //修改个人资料动作
+    public function update(User $user, Request $request)
+    {
+        $this->validate($request, [
+           'name' => 'required|max:50',
+           'password' => 'nullable|confirmed|min:6'
+        ]);
+
+        $this->authorize('update', $user);
+
+        $data = [];
+        $data['name'] = $request->name;
+        if ($request->password) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        $user->update($data);
+
+        session()->flash('success', '个人资料更新成功！');
+
+        return redirect()->route('users.show', $user->id);
+    }
+
+    public function destroy(User $user)
+    {
+        $this->authorize('destroy', $user);
+        $user->delete();
+        session()->flash('success', '成功删除用户！');
+        return back();
     }
 }
