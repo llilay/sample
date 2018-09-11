@@ -2,9 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\User;
-use App\Policies\UserPolicy;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -19,6 +17,7 @@ class AuthServiceProvider extends ServiceProvider
         //\App\Models\User::class => \App\Policies\UserPolicy::class //报错 ???
         'App\Models\User' => 'App\Policies\UserPolicy',
         //User::class => UserPolicy::class,
+        'App\Models\Status' => 'App\Policies\StatusPolicy',
     ];
 
     /**
@@ -26,9 +25,9 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(GateContract $gate)
     {
-        $this->registerPolicies();
+        $this->registerPolicies($gate);
 
         //
     }
